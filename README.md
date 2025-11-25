@@ -227,3 +227,31 @@ IELTS-Speaking-Simulator/
 **开始使用：最简单的方式是运行 `web_interface\run_server.bat` 然后在浏览器中访问 `http://localhost:5000`！**
 
 **Get Started: The easiest way is to run `web_interface\run_server.bat` and visit `http://localhost:5000` in your browser!**
+
+## Character Mode
+
+环境配置，可以参考reference_environment.yaml以及characters_third_party/Musetalk中的Readme.md
+
+#运行
+```bash
+cd characters_third_party/Musetalk
+python ielts_app.py
+```
+
+# Citation
+```bib
+@article{musetalk,
+  title={MuseTalk: Real-Time High-Fidelity Video Dubbing via Spatio-Temporal Sampling},
+  author={Zhang, Yue and Zhong, Zhizhou and Liu, Minhao and Chen, Zhaokang and Wu, Bin and Zeng, Yubin and Zhan, Chao and He, Yingjie and Huang, Junxin and Zhou, Wenjiang},
+  journal={arxiv},
+  year={2025}
+}
+
+@misc{ielts-speaking-simulator,
+  title     = {IELTS Speaking Simulator: A Multimodal Avatar-LLM-driven Framework for IELTS Speaking Assessment and Practice},
+  author    = {Aiwen LU, Jingxuan Chen, Baiyu Huang, Yini Huang, Yantong Liu},
+  year      = {2025},
+  note      = {INFH5000, HKUST(GZ)}
+}
+```
+
