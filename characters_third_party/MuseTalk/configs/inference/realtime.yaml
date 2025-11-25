@@ -1,0 +1,10 @@
+trump:
+ preparation: True # your can set it to False if you want to use the existing avator, it will save time
+ bbox_shift: 5
+ video_path: "data/video/trump.mp4"
+ audio_clips:
+     #audio_0: "data/audio/test.wav"
+     audio_1: "data/audio/part2.wav"
+ 
+  
+

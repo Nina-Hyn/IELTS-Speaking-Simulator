@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>MuseTalk Live Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .container { max-width: 720px; margin: 0 auto; }
+    .status { margin-top: 10px; }
+    video { width: 100%; max-width: 640px; border: 1px solid #ccc; margin-top: 12px; }
+    .hint { color: #666; margin-top: 6px; }
+    .btn { padding: 8px 12px; border-radius: 6px; background: #1976d2; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>MuseTalk — Upload WAV to drive mouth movements</h2>
+
+    <form id="uploadForm">
+      <input type="file" id="fileInput" name="file" accept=".wav" required />
+      <button class="btn" type="submit">Upload & Generate</button>
+    </form>
+
+    <div class="status" id="status">Idle</div>
+    <div class="hint">When processing completes, the video below will update automatically.</div>
+
+    <video id="resultVideo" controls>
+      <source id="videoSrc" src="/latest.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+<script>
+const statusEl = document.getElementById("status");
+const videoEl = document.getElementById("resultVideo");
+const videoSrc = document.getElementById("videoSrc");
+
+document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fileInput = document.getElementById("fileInput");
+  if (!fileInput.files.length) return alert("Please choose a .wav file");
+
+  const form = new FormData();
+  form.append("file", fileInput.files[0]);
+
+  statusEl.textContent = "Uploading...";
+  try {
+    const resp = await fetch("/upload", { method: "POST", body: form });
+    if (resp.status === 409) {
+      const j = await resp.json();
+      statusEl.textContent = j.message || "Server busy. Try later.";
+      return;
+    }
+    const j = await resp.json();
+    if (j.status === "started") {
+      statusEl.textContent = "Started processing... (job " + j.job_id + ")";
+      // 启动轮询
+      pollStatusAndRefresh();
+    } else {
+      statusEl.textContent = "Upload response: " + JSON.stringify(j);
+    }
+  } catch (err) {
+    statusEl.textContent = "Upload failed: " + err;
+  }
+});
+
+let pollInterval = null;
+function pollStatusAndRefresh() {
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(async () => {
+    try {
+      const r = await fetch("/status");
+      const js = await r.json();
+      if (js.running) {
+        statusEl.textContent = "Processing... (job: " + (js.id || "unknown") + ")";
+      } else {
+        statusEl.textContent = "Idle (last job: " + (js.id || "none") + ", status: " + js.status + ")";
+        // 处理完成，强制刷新 video（避免缓存）
+        const newSrc = "/latest.mp4?t=" + Date.now();
+        videoSrc.src = newSrc;
+        // reload video element
+        videoEl.load();
+        // 停止轮询
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+    } catch(e) {
+      console.error("status poll err", e);
+    }
+  }, 1500); // 每 1.5 秒轮询一次
+}
+</script>
+</body>
+</html>
